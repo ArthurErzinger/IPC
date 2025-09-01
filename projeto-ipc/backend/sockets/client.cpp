@@ -17,11 +17,29 @@ int main() {
 
     connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
 
-    std::string message;
-    std::cout << "Digite a mensagem para enviar ao servidor: ";
-    std::getline(std::cin, message);
 
-    send(clientSocket, message.c_str(), message.size(), 0);
+    while (true)
+    {
+        std::string message;
+        std::cout << "Digite a mensagem para enviar ao servidor: ";
+        std::getline(std::cin, message);
+
+        send(clientSocket, message.c_str(), message.size(), 0);
+
+
+        // Receber resposta do servidor
+        char buffer2[5096] = {0};
+        int bytesReceived = recv(clientSocket, buffer2, sizeof(buffer2), 0);
+        std::cout << "Mensagem recebida do servidor: " << buffer2 << std::endl;
+
+        std::string mensagemServidor(buffer2, bytesReceived);
+
+        if (mensagemServidor == "Fechando socket...")
+        {
+            break;
+        }
+    }
+    
 
     closesocket(clientSocket);
     WSACleanup();
