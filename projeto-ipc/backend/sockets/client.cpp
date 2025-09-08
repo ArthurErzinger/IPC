@@ -8,18 +8,14 @@
 #include <ctime>
 #pragma comment(lib, "Ws2_32.lib")
 
-// Função para gerar timestamp em formato ISO 8601 (UTC)
 std::string getTimestamp() {
-    using namespace std::chrono;
-    auto now = system_clock::now();
-    std::time_t now_time = system_clock::to_time_t(now);
+    // Get the current calendar time as a time_t object
+    time_t currentTime = time(NULL); 
 
-    std::tm utc_tm;
-    gmtime_s(&utc_tm, &now_time);  // versão segura no Windows
+    // Convert the time_t object to a human-readable string (local time)
+    char* dateTimeString = ctime(&currentTime);
 
-    std::ostringstream oss;
-    oss << std::put_time(&utc_tm, "%Y-%m-%dT%H:%M:%SZ");
-    return oss.str();
+    return std::string(dateTimeString);
 }
 
 // Logger JSON
