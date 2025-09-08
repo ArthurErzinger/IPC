@@ -35,7 +35,7 @@ class FrontEndIPCApp:
         # Writer (esquerda)
         writer_frame = ttk.Frame(frame_main)
         writer_frame.pack(side='left', fill='both', expand=True, padx=(0,5))
-        ttk.Label(writer_frame, text="Writer / Pai (Pipe)").pack()
+        ttk.Label(writer_frame, text="Writer (SM) / Pai (Pipe) / Cliente (Sockets)").pack()
         self.writer_text = scrolledtext.ScrolledText(writer_frame, height=20)
         self.writer_text.pack(fill='both', expand=True)
 
@@ -50,7 +50,7 @@ class FrontEndIPCApp:
         # Reader (direita) - usado para Memória e Socket
         reader_frame = ttk.Frame(frame_main)
         reader_frame.pack(side='left', fill='both', expand=True, padx=(5,0))
-        ttk.Label(reader_frame, text="Reader / Cliente").pack()
+        ttk.Label(reader_frame, text="Reader / Server (Sockets)").pack()
         self.reader_text = scrolledtext.ScrolledText(reader_frame, height=25, state='disabled')
         self.reader_text.pack(fill='both', expand=True)
 
@@ -81,14 +81,14 @@ class FrontEndIPCApp:
         self.writer_text.see(tk.END)
 
         if metodo == "Memória Compartilhada":
-            self.writer_exec = r"C:\Users\Arthur\Desktop\coding\IPC\projeto-ipc\backend\shared_memory\writer.exe"
-            self.reader_exec = r"C:\Users\Arthur\Desktop\coding\IPC\projeto-ipc\backend\shared_memory\reader.exe"
+            self.writer_exec = r"C:\Users\Arthur\Desktop\IPC\projeto-ipc\backend\shared_memory\writer.exe"
+            self.reader_exec = r"C:\Users\Arthur\Desktop\IPC\projeto-ipc\backend\shared_memory\reader.exe"
             self.iniciar_writer()
             time.sleep(1)  # <-- delay de 1 segundo antes de iniciar o reader
             self.iniciar_reader()
 
         elif metodo == "Pipe":
-            self.writer_exec = r"C:\Users\Arthur\Desktop\coding\IPC\projeto-ipc\backend\pipes\pipes.exe"
+            self.writer_exec = r"C:\Users\Arthur\Desktop\IPC\projeto-ipc\backend\pipes\pipes.exe"
             try:
                 self.writer_proc = subprocess.Popen(
                     [self.writer_exec], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, text=True
@@ -100,8 +100,8 @@ class FrontEndIPCApp:
                 self.writer_text.insert(tk.END, "Erro: pipes.exe não encontrado.\n")
 
         elif metodo == "Socket":
-            self.writer_exec = r"C:\Users\Arthur\Desktop\coding\IPC\projeto-ipc\backend\sockets\client.exe"
-            self.reader_exec = r"C:\Users\Arthur\Desktop\coding\IPC\projeto-ipc\backend\sockets\server.exe"
+            self.writer_exec = r"C:\Users\artho\OneDrive\Desktop\IPC\projeto-ipc\backend\sockets\client.exe"
+            self.reader_exec = r"C:\Users\artho\OneDrive\Desktop\IPC\projeto-ipc\backend\sockets\server.exe"
             self.iniciar_writer()
             time.sleep(1)  # <-- delay antes do client socket
             self.iniciar_reader()
