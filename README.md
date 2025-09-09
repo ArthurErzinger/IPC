@@ -2,9 +2,6 @@
 
 Este repositório implementa **três mecanismos de IPC** em C++ com **interface gráfica em Python (Tkinter)** para visualizar o fluxo de dados em tempo real: **Pipes Anônimos**, **Sockets (locais)** e **Memória Compartilhada**. O projeto segue a organização, os requisitos funcionais e não‑funcionais, e a rubrica do enunciado da atividade avaliativa (RA1).
 
-> ⚠️ Observação importante: os computadores de laboratório podem ter restrições de instalação. Compile e teste **no mesmo ambiente** onde será feita a prova de autoria.
-
-
 ---
 
 ## 1) Objetivo Geral
