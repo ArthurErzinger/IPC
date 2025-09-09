@@ -93,7 +93,7 @@ Todos os módulos **escrevem em stdout** mensagens JSON que o frontend consome e
 
 ### 4.1 MinGW‑w64 (g++)
 1) Instale o **MinGW‑w64** e adicione `g++` ao `PATH`.
-2) A partir da raiz do repositório, rode:
+2) A partir da pasta projeto-ipc, rode:
 
 ```bash
 # Sockets (linka Ws2_32)
