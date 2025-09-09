@@ -12,9 +12,9 @@ const wchar_t* NOME_MUTEX   = L"MeuMutex";
 const int TAM_MEMORIA = 256;
 
 // Estrutura de dados que serão armazenados na memória compartilhada
-struct SharedData {
+struct DadosCompartilhados {
     wchar_t mensagem[TAM_MEMORIA]; // buffer da mensagem escrita pelo writer
-    bool encerrar_flag;               // flag para sinalizar encerramento (definida pelo writer)
+    bool encerrar_flag;             // flag para sinalizar encerramento (definida pelo writer)
 };
 
 // Função para gerar timestamp em formato ISO 8601
@@ -54,14 +54,14 @@ int main() {
     - NOME_MEMORIA*/
     HANDLE hMapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, NOME_MEMORIA);
     if (!hMapFile) { 
-        logger(L"error", L"open_memory", L"Erro ao abrir memória compartilhada", GetLastError(), L"system");
+        logger(L"error", L"abrindo memória", L"Erro ao abrir memória compartilhada", GetLastError(), L"system");
         return 1; 
     }
     // Mapeia a memória compartilhada para o espaço de endereços do processo
-    SharedData* sharedMem = (SharedData*)MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SharedData));
+    DadosCompartilhados* pontMem = (DadosCompartilhados*)MapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(DadosCompartilhados));
     // Verifica se o o ponteiro que a aponta para a memória é valido, se a memória foi mapeada com sucesso
-    if (!sharedMem) { 
-        logger(L"error", L"map_memory", L"Erro ao mapear memória", GetLastError(), L"system");
+    if (!pontMem) { 
+        logger(L"error", L"mapeando memória", L"Erro ao mapear memória", GetLastError(), L"system");
         CloseHandle(hMapFile); //Fecha o handle da memória compartilhada
         return 1; 
     }
@@ -72,8 +72,8 @@ int main() {
     HANDLE hMutex = OpenMutexW(SYNCHRONIZE, FALSE, NOME_MUTEX);
     // Verifica se o handle é valido, se o mutex foi aberto com sucesso
     if (!hMutex) { 
-        logger(L"error", L"open_mutex", L"Erro ao abrir Mutex", GetLastError(), L"system");
-        UnmapViewOfFile(sharedMem); // Desmapeia a memória
+        logger(L"error", L"abrindo mutex", L"Erro ao abrir Mutex", GetLastError(), L"system");
+        UnmapViewOfFile(pontMem); // Desmapeia a memória
         CloseHandle(hMapFile); 
         return 1; 
     }
@@ -84,26 +84,28 @@ int main() {
         // Espera para adquirir o mutex
         DWORD dwWait = WaitForSingleObject(hMutex, INFINITE);
         if (dwWait != WAIT_OBJECT_0) {
-            logger(L"error", L"wait_mutex", L"Falha ao esperar pelo Mutex", GetLastError(), L"system");
+            logger(L"error", L"esperando mutex", L"Falha ao esperar pelo Mutex", GetLastError(), L"system");
             break;
         }
 
         // Lê a mensagem atual da memória compartilhada
-        std::wstring current(sharedMem->mensagem);
+        std::wstring atual(pontMem->mensagem);
 
         // Verifica se a flag de encerramento doi definida como true pelo writer e encerra
-        if (sharedMem->encerrar_flag) {
-            logger(L"info", L"exit", L"Reader encerrado por flag", 0, L"shared_memory");
+        if (pontMem->encerrar_flag) {
+            logger(L"info", L"mutex adiquirido", L"Leitura protegida por mutex", 0, L"system");
+            logger(L"info", L"Encerrar", L"Reader encerrado", 0, L"shared_memory");
+            logger(L"info", L"mutex liberado", L"Reader liberou o mutex", 0, L"system");
             ReleaseMutex(hMutex); // libera o mutex antes de sair
             break;
         }
 
         // Se há mensagem nova, registra no logger
-        if (!current.empty()) {
-            logger(L"info", L"mutex_acquire", L"Leitura protegida por mutex", 0, L"system");
-            logger(L"info", L"read", current, current.size(), L"shared_memory");
-            logger(L"info", L"mutex_release", L"Reader liberou o mutex", 0, L"system");
-            sharedMem->mensagem[0] = L'\0'; // Limpa a mensagem após ler, libera o buffer
+        if (!atual.empty()) {
+            logger(L"info", L"mutex adiquirido", L"Leitura protegida por mutex", 0, L"system");
+            logger(L"info", L"Leitura", atual, atual.size(), L"shared_memory");
+            logger(L"info", L"mutex liberado", L"Reader liberou o mutex", 0, L"system");
+            pontMem->mensagem[0] = L'\0'; // Limpa a mensagem após ler, libera o buffer
         }
 
         ReleaseMutex(hMutex); // libera o mutex para o writer
@@ -111,7 +113,7 @@ int main() {
     }
 
    // Lopp encerrado, desmapeia a memoria e fecha os handles da memória e do mutex
-    UnmapViewOfFile(sharedMem);
+    UnmapViewOfFile(pontMem);
     CloseHandle(hMapFile);
     CloseHandle(hMutex);
     return 0;
